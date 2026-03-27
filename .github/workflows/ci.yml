@@ -1,0 +1,31 @@
+name: Мой первый DevOps Pipeline
+
+# Когда запускать робота? При каждом пуше в ветку master (или main)
+on:
+  push:
+    branches: [ "master", "main" ]
+
+jobs:
+  test-our-app:
+    # GitHub сам выдаст нам чистую виртуалку на Ubuntu для этой задачи!
+    runs-on: ubuntu-latest 
+
+    steps:
+    - name: 1. Скачиваем свежий код из репозитория
+      uses: actions/checkout@v4
+
+    - name: 2. Запускаем нашу систему (Docker Compose)
+      # На серверах GitHub уже установлен Docker!
+      run: docker compose up -d --build
+
+    - name: 3. Ждем 5 секунд, чтобы Java и Nginx успели стартовать
+      run: sleep 5
+
+    - name: 4. Устанавливаем Java 21 на виртуалку GitHub
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: 5. Запускаем авто-тест!
+      run: java TestApp.java
