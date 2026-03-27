@@ -1,17 +1,28 @@
 services:
   my-web-app:
     build: .
-    # Мы УДАЛИЛИ секцию ports! Теперь Java спрятана внутри сети Docker 
-    # и доступна только другим контейнерам по имени "my-web-app" и порту 8080.
+    depends_on:
+      - rabbitmq
 
   nginx:
     image: nginx:latest
-    # Пробрасываем порты для Nginx (внешний 80 : внутренний 80)
     ports:
       - "80:80"
-    # Подкидываем Nginx наш файл настроек с компьютера внутрь контейнера
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    # Говорим, что Nginx должен запускаться только ПОСЛЕ того, как запустится Java
     depends_on:
       - my-web-app
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  # --- НАШ НОВЫЙ МИКРОСЕРВИС ---
+  inventory-service:
+    build: 
+      context: .
+      dockerfile: Dockerfile.worker
+    depends_on:
+      - rabbitmq

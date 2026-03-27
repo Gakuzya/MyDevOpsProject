@@ -1,0 +1,13 @@
+# Берем легкую версию Linux с Python
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Устанавливаем библиотеку pika для работы с RabbitMQ
+RUN pip install pika
+
+# Копируем наш скрипт
+COPY worker.py .
+
+# Запускаем скрипт (флаг -u нужен, чтобы логи сразу выводились на экран)
+CMD ["python", "-u", "worker.py"]
