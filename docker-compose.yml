@@ -1,5 +1,17 @@
 services:
   my-web-app:
     build: .
+    # Мы УДАЛИЛИ секцию ports! Теперь Java спрятана внутри сети Docker 
+    # и доступна только другим контейнерам по имени "my-web-app" и порту 8080.
+
+  nginx:
+    image: nginx:latest
+    # Пробрасываем порты для Nginx (внешний 80 : внутренний 80)
     ports:
-      - "8081:8080"
+      - "80:80"
+    # Подкидываем Nginx наш файл настроек с компьютера внутрь контейнера
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    # Говорим, что Nginx должен запускаться только ПОСЛЕ того, как запустится Java
+    depends_on:
+      - my-web-app
